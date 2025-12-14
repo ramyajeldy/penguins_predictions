@@ -1,0 +1,18 @@
+[project]
+name = "final-prj-folder"
+version = "0.1.0"
+description = "Penguins Classifier with FastAPI"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+"scikit-learn",
+"pandas",
+"numpy",
+"matplotlib",
+"seaborn",
+"fastapi",
+"uvicorn",
+"pydantic",
+"ipykernel",
+"xgboost"
+]

@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, Field
+from typing import Literal
 import logging
 import pandas as pd
 import pickle
@@ -52,12 +53,12 @@ except Exception as e:
 # Input Schema (matches instructions format)
 
 class PredictionInput(BaseModel):
-    island: str = Field(..., example="Biscoe")
-    bill_length_mm: float = Field(..., example=45.1)
-    bill_depth_mm: float = Field(..., example=14.5)
-    flipper_length_mm: float = Field(..., example=210)
-    body_mass_g: float = Field(..., example=4500)
-    sex: str = Field(..., example="male")
+    island: Literal["Biscoe", "Dream", "Torgersen"] = Field(..., example="Biscoe", description="Island where the penguin was observed")
+    bill_length_mm: float = Field(..., gt=0, example=45.1, description="Bill length in millimetres; must be positive")
+    bill_depth_mm: float = Field(..., gt=0, example=14.5, description="Bill depth in millimetres; must be positive")
+    flipper_length_mm: int = Field(..., gt=0, example=210, description="Flipper length in millimetres; must be positive integer")
+    body_mass_g: int = Field(..., gt=0, example=4500, description="Body mass in grams; must be positive integer")
+    sex: Literal["male", "female"] = Field(..., example="male", description="Sex of the penguin (male/female)")
 
 
 # Output Schema (matches instructions format)

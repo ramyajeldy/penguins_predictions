@@ -5,14 +5,14 @@ description = "Penguins Classifier with FastAPI"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-"scikit-learn",
-"pandas",
-"numpy",
-"matplotlib",
-"seaborn",
-"fastapi",
-"uvicorn",
-"pydantic",
-"ipykernel",
-"xgboost"
+    "scikit-learn",
+    "pandas",
+    "numpy",
+    "matplotlib",
+    "seaborn",
+    "fastapi[standard]",
+    "uvicorn[standard]",
+    "pydantic",
+    "ipykernel",
+    "xgboost",
 ]

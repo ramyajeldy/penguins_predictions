@@ -1,52 +1,64 @@
-def main():
-    print("Hello from final-prj-folder!")
-
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
-import pickle
 import pandas as pd
+import pickle
 
-app = FastAPI(title="Penguins Species Classifier API")
+# -------------------------------------------------
+# Initialize FastAPI app
+# -------------------------------------------------
+app = FastAPI(title="Penguins Species Prediction API")
 
-# Load model once at startup
-with open("model.pkl", "rb") as f:
-    artifacts = pickle.load(f)
+# -------------------------------------------------
+# Load trained model artifacts
+# -------------------------------------------------
+try:
+    with open("model.pkl", "rb") as f:
+        artifacts = pickle.load(f)
+        model = artifacts["model"]
+        label_encoder = artifacts["label_encoder"]
+        model_columns = artifacts["columns"]
+except Exception as e:
+    raise RuntimeError(f"Failed to load model artifacts: {e}")
 
-model = artifacts["model"]
-label_encoder = artifacts["label_encoder"]
-model_columns = artifacts["columns"]
-class PenguinFeatures(BaseModel):
-    bill_length_mm: float = Field(..., example=43.2)
-    bill_depth_mm: float = Field(..., example=17.1)
-    flipper_length_mm: float = Field(..., example=201)
-    body_mass_g: float = Field(..., example=4200)
+# -------------------------------------------------
+# Input Schema (matches instructions format)
+# -------------------------------------------------
+class PredictionInput(BaseModel):
+    island: str = Field(..., example="Biscoe")
+    bill_length_mm: float = Field(..., example=45.1)
+    bill_depth_mm: float = Field(..., example=14.5)
+    flipper_length_mm: float = Field(..., example=210)
+    body_mass_g: float = Field(..., example=4500)
     sex: str = Field(..., example="male")
-    
+
+# -------------------------------------------------
+# Output Schema (matches instructions format)
+# -------------------------------------------------
 class PredictionOutput(BaseModel):
-    predicted_species: str
-   
+    prediction: str   # predicted penguin species
+
+# -------------------------------------------------
+# Prediction Endpoint
+# -------------------------------------------------
 @app.post("/predict", response_model=PredictionOutput)
-def predict_species(data: PenguinFeatures):
+async def predict(input_data: PredictionInput):
     try:
         # Convert input to DataFrame
-        input_df = pd.DataFrame([data.dict()])
+        input_df = pd.DataFrame([input_data.dict()])
 
         # One-hot encode categorical variables
         input_df = pd.get_dummies(input_df)
 
-        # Align columns with training data
+        # Align with training columns
         input_df = input_df.reindex(columns=model_columns, fill_value=0)
 
-        # Predict
-        prediction = model.predict(input_df)[0]
+        # Model prediction
+        pred_numeric = model.predict(input_df)[0]
 
-        # Decode label
-        species = label_encoder.inverse_transform([prediction])[0]
+        # Decode numeric label to species name
+        pred_label = label_encoder.inverse_transform([pred_numeric])[0]
 
-        return PredictionOutput(predicted_species=species)
+        return PredictionOutput(prediction=pred_label)
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-if __name__ == "__main__":
-    main()

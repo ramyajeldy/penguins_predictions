@@ -6,9 +6,9 @@ import logging
 import pandas as pd
 import pickle
 
-# -------------------------------------------------
+
 # Initialize FastAPI app
-# -------------------------------------------------
+
 app = FastAPI(title="Penguins Species Prediction API")
 
 
@@ -36,9 +36,9 @@ async def generic_exception_handler(request: Request, exc: Exception):
         content={"error": "internal_server_error", "detail": "An internal error occurred."},
     )
 
-# -------------------------------------------------
+
 # Load trained model artifacts
-# -------------------------------------------------
+
 try:
     with open("model.pkl", "rb") as f:
         artifacts = pickle.load(f)
@@ -48,9 +48,9 @@ try:
 except Exception as e:
     raise RuntimeError(f"Failed to load model artifacts: {e}")
 
-# -------------------------------------------------
+
 # Input Schema (matches instructions format)
-# -------------------------------------------------
+
 class PredictionInput(BaseModel):
     island: str = Field(..., example="Biscoe")
     bill_length_mm: float = Field(..., example=45.1)
@@ -59,15 +59,15 @@ class PredictionInput(BaseModel):
     body_mass_g: float = Field(..., example=4500)
     sex: str = Field(..., example="male")
 
-# -------------------------------------------------
+
 # Output Schema (matches instructions format)
-# -------------------------------------------------
+
 class PredictionOutput(BaseModel):
     prediction: str   # predicted penguin species
 
-# -------------------------------------------------
+
 # Prediction Endpoint
-# -------------------------------------------------
+
 @app.post("/predict", response_model=PredictionOutput)
 async def predict(input_data: PredictionInput):
     try:
